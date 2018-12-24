@@ -55,7 +55,7 @@ RUN PYTHON_BIN_PATH=/usr/bin/python \
         TF_DOWNLOAD_CLANG=0 \
         TF_SET_ANDROID_WORKSPACE=0 \
         bash configure
-RUN bazel build -c opt --local_resources ${LOCAL_RESOURCES} --jobs 2 //tensorflow/tools/pip_package:build_pip_package
+RUN bazel build -c opt --local_resources ${LOCAL_RESOURCES} --jobs 8 //tensorflow/tools/pip_package:build_pip_package
 RUN ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
 RUN cd
 RUN pip3 install --no-cache-dir /tmp/tensorflow_pkg/tensorflow-${TENSORFLOW_VERSION}-cp36-cp36m-linux_x86_64.whl \
