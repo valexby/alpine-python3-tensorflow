@@ -1,7 +1,7 @@
 # Prepares an alpine based image with Python3 and TF installed
 # TF is compiled for CPU and without AVX so should be able to run on older processors and virtual machines
 
-FROM alpine:3.8
+FROM alexvasiuk/alpine3.8-python3.7-opencv
 
 LABEL maintainer="mech <mech@themech.net>"
 
@@ -12,11 +12,9 @@ ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
 
 RUN apk upgrade --update \
     && apk add --no-cache python3 py3-numpy py3-numpy-f2py libpng libjpeg-turbo \
-    && rm -rf /usr/bin/python \
-    && ln -s /usr/bin/python3 /usr/bin/python \
-    && pip3 install -U --no-cache-dir pip setuptools wheel \
+    && pip install -U --no-cache-dir pip setuptools wheel \
     && : install tools needed during the build process \
-    && apk add --no-cache --virtual=.build-deps curl bash openjdk8 build-base gcc g++ linux-headers zip musl-dev patch python3-dev py-numpy-dev \
+    && apk add --no-cache --virtual=.build-deps curl bash openjdk8 build-base gcc g++ linux-headers zip musl-dev patch python3-dev py-numpy-dev clang \
     && : download and build bazel \
     && cd /tmp \
     && curl -SLO https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-dist.zip \
@@ -37,8 +35,8 @@ RUN apk upgrade --update \
     && sed -i -e '/define TF_GENERATE_BACKTRACE/d' tensorflow/core/platform/default/stacktrace.h \
     && sed -i -e '/define TF_GENERATE_STACKTRACE/d' tensorflow/core/platform/stacktrace_handler.cc \
     && : the types below are fixed in tensorflow 1.11 \
-    && sed -i -e 's/uint /uint32_t /g' tensorflow/contrib/lite/kernels/internal/spectrogram.cc \
-    && PYTHON_BIN_PATH=/usr/bin/python \
+    && sed -i -e 's/uint /uint32_t /g' tensorflow/contrib/lite/kernels/internal/spectrogram.cc
+RUN PYTHON_BIN_PATH=/usr/bin/python \
         PYTHON_LIB_PATH=/usr/lib/python3.6/site-packages \
         CC_OPT_FLAGS="-march=native" \
         TF_NEED_JEMALLOC=1 \
