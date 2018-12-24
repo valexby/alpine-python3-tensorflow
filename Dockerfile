@@ -35,9 +35,8 @@ RUN apk upgrade --update \
     && sed -i -e '/define TF_GENERATE_BACKTRACE/d' tensorflow/core/platform/default/stacktrace.h \
     && sed -i -e '/define TF_GENERATE_STACKTRACE/d' tensorflow/core/platform/stacktrace_handler.cc \
     && : the types below are fixed in tensorflow 1.11 \
-    && sed -i -e 's/uint /uint32_t /g' tensorflow/contrib/lite/kernels/internal/spectrogram.cc
-WORKDIR /tmp/tensorflow-1.10.1
-RUN PYTHON_BIN_PATH=/usr/local/bin/python \
+    && sed -i -e 's/uint /uint32_t /g' tensorflow/contrib/lite/kernels/internal/spectrogram.cc \
+    && PYTHON_BIN_PATH=/usr/local/bin/python \
         PYTHON_LIB_PATH=/usr/local/lib/python3.6/site-packages \
         CC_OPT_FLAGS="-march=native" \
         TF_NEED_JEMALLOC=1 \
@@ -55,12 +54,12 @@ RUN PYTHON_BIN_PATH=/usr/local/bin/python \
         TF_NEED_OPENCL_SYCL=0 \
         TF_DOWNLOAD_CLANG=0 \
         TF_SET_ANDROID_WORKSPACE=0 \
-        bash configure
-RUN bazel build -c opt --local_resources ${LOCAL_RESOURCES} --jobs 8 //tensorflow/tools/pip_package:build_pip_package
-RUN ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
-RUN cd
-RUN pip3 install --no-cache-dir /tmp/tensorflow_pkg/tensorflow-${TENSORFLOW_VERSION}-cp36-cp36m-linux_x86_64.whl \
-    && : cleanup temp files
-RUN apk del .build-deps
-RUN rm -f /usr/bin/bazel
-RUN rm -rf /tmp/* /root/.cache
+        bash configure \
+    && bazel build -c opt --local_resources ${LOCAL_RESOURCES} --jobs 8 //tensorflow/tools/pip_package:build_pip_package \
+    && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg \
+    && cd \
+    && pip3 install --no-cache-dir /tmp/tensorflow_pkg/tensorflow-${TENSORFLOW_VERSION}-cp36-cp36m-linux_x86_64.whl \
+    && : cleanup temp files \
+    && apk del .build-deps \
+    && rm -f /usr/bin/bazel \
+    && rm -rf /tmp/* /root/.cache
