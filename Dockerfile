@@ -36,6 +36,7 @@ RUN apk upgrade --update \
     && sed -i -e '/define TF_GENERATE_STACKTRACE/d' tensorflow/core/platform/stacktrace_handler.cc \
     && : the types below are fixed in tensorflow 1.11 \
     && sed -i -e 's/uint /uint32_t /g' tensorflow/contrib/lite/kernels/internal/spectrogram.cc
+WORKDIR /tmp/tensorflow-1.10.1
 RUN PYTHON_BIN_PATH=/usr/bin/python \
         PYTHON_LIB_PATH=/usr/lib/python3.6/site-packages \
         CC_OPT_FLAGS="-march=native" \
